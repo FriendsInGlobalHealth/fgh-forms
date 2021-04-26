@@ -1,0 +1,392 @@
+<htmlform>
+  <script type="text/javascript">
+  var formulations = {
+    1703: [ "Drug:40", "Drug:22"],
+    6100: [ "Drug:28", "Drug:22"]
+  }
+
+  function emptyValue(value) {
+    return value === null || value === undefined || value === '';
+  }
+
+  var formulationsOptions = {};
+  var valueLessOption = null;
+
+  jQuery(function() {
+    // Initially (For example when editing the form)
+      var initialRegimen = getValue('regime.value');
+      if(!emptyValue(initialRegimen)) {
+        jQuery('span[name="regimen-formulations"] select').each(function() {
+          jQuery(this).children().each(function() {
+            var optionValue = jQuery(this).val();
+            if(!emptyValue(optionValue) &#38;&#38; !formulations[initialRegimen].includes(optionValue)) {
+              jQuery(this).remove()
+            } 
+            if(emptyValue(optionValue)) {
+              valueLessOption = this;
+            } else {
+              formulationsOptions[optionValue] = this;
+            }
+          });
+        });
+      }
+    console.log('formulations: ', formulationsOptions);
+    getField('regime.value').change(function(){
+        var regimenValue = getValue('regime.value');
+        jQuery('span[name="regimen-formulations"] select').each(function() {
+            var _thisSelect = this;
+            jQuery(_thisSelect).children().remove();
+            var jQuerizedOption = jQuery(valueLessOption);
+            jQuery(_thisSelect).append(jQuerizedOption[0].outerHTML);
+
+            formulations[regimenValue].forEach(function(optionValue) {
+              jQuerizedOption = jQuery(formulationsOptions[optionValue]);
+              jQuery(_thisSelect).append(jQuerizedOption[0].outerHTML);
+            });
+        });
+    });
+  });
+
+  jQuery(function() {
+    getField('levaCamp.value').change(function(){
+     if(getValue('levaCamp.value') == 1065) {
+        getField('nomeCamp.value').show();
+      } 
+      else{
+       setValue('nomeCamp.value','');
+        getField('nomeCamp.value').hide();
+      }
+    })
+  });
+      
+    //Validações antes de submter
+   beforeSubmit.push(function() {  
+      
+      //Data de proximo levantamento  
+      var dataProximoLev = new Date(getValue('dataProxima.value'));
+     
+      //Data da consulta seleccionada
+     var dataConsulta = new Date(getValue('dataConsulta.value'));
+  
+      //Ultimo estadio do paciente
+      var lastRegime = parseInt("<lookup expression="fn.latestObs(1088).valueCoded"/>");
+      //Estadio Seleccionado
+      var selectedRegime = parseInt(getValue('regime.value'));  
+      
+      //Data de Nascimento  
+      var dataNascimento = new Date(Date.parse("<lookup expression="patient.birthdate"/>"));
+
+           //Modo de dispensa seleccionado
+    var selectedDispenseMode = parseInt(getValue('modoDeDispensa.value'));  
+
+if (isNaN(selectedDispenseMode)){      
+    alert("Modo de dispensa não foi seleccionado!")
+  }
+      
+      //Data de inicio de TARV
+      //var dataInicioTARV = "<lookup expression="fn.latestObs(1190).valueDatetime"/>";
+     
+      var estadoProgramaTarvConceptID = parseInt("<lookup expression="fn.currentProgramWorkflowStatus(2).state.concept.id" />")
+  
+         
+      if (isNaN(estadoProgramaTarvConceptID)){      
+        getField('dataConsulta.error').html('Deve admitir este paciente no programa de TARV - TRATAMENTO').show();
+        return false;     
+      }else{
+        if(!((estadoProgramaTarvConceptID==6269) || (estadoProgramaTarvConceptID==1369))){
+          getField('dataConsulta.error').html('Este paciente não está no estado activo no programa, coloque-o como activo primeiro').show();
+          return false; 
+        }
+     }
+     
+      
+      //Compara se a data de levantamento e menor que data de nascimento
+      //if (dataInicioTARV == '') {         
+      //    getField('dataConsulta.error').html('O Paciente não tem data de inicio de TARV registado na Ficha de Seguimento (Antigo) ou Ficha Resumo (Master Card)').show();
+      //    return false;           
+      //}
+     
+      //Compara se a data da proxima é menor que a data de levantamento 
+      if (dataProximoLev &lt;=  dataConsulta) {         
+          getField('dataProxima.error').html('A data do proximo levantamento não deve ser menor ou igual que a data de levantamento').show();
+         return false;           
+      }
+  
+     //Compara se a data de levantamento e menor que data de nascimento
+      if (dataConsulta &lt;  dataNascimento) {          
+          getField('dataConsulta.error').html('A data do levantamento não deve ser menor que a data de nascimento').show();
+         return false;           
+      }   
+      
+      
+        
+        if(lastRegime != selectedRegime){
+         var confirmacao=window.confirm('Confirma a mudança de regime deste paciente?');
+         if(confirmacao == false)
+          return false;
+       }
+     
+          $j('.submitButton').prop('disabled', true);   
+              
+      return true;
+    }); 
+    
+  </script>
+  <html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>FILA</title>
+    
+    <style>
+       h2 { border-bottom: 3px solid red; }
+        p { border: 1px solid black; }
+        table{
+          border-color: #600;
+         border-width: 0 0 1px 1px;
+          border-style: solid;}
+  
+       td{
+         border-color: #600;
+         border-width: 1px 1px 0 0;
+          border-style: solid;
+          margin: 0;
+          padding: 4px;
+         background-color: #B2DFEE;}
+       .style1 {
+         font-size: 14px;
+          font-weight: bold;}
+       .section {
+          border: 1px solid $headerColor;
+         padding: 2px;
+         text-align: center;
+         margin-bottom: 1em;
+         border-width:thin;
+          width:50%;
+          vertical-align:middle;
+          azimuth:center;}
+        .sectionHeader {
+          background-color: $headerColor;
+         color: $fontOnHeaderColor;
+          display: block;
+         padding: 2px;
+         font-weight: bold;}
+       table.baseline-aligned td {
+         vertical-align: baseline;}
+    </style>
+  </head>
+  <body>
+  <table width="1000" border="1" align="center">
+    <tbody align="left" style="font-family:verdana; font-size:12px">
+    <tr>
+      <td width="285" rowspan="4">REPÚBLICA DE MOÇAMBIQUE<br/>Serviço Nacional de Saúde</td>
+      <td colspan="2"><div align="center" class="style1">Ficha Individual de Levantamento de ARVs (FILA)</div></td>
+    </tr>
+    <tr>
+      <td colspan="2">
+       Nº do Livro TARV:<lookup expression="fn.latestObs(6264).getValueAsString($!{locale})"/>   
+       Pag: <lookup expression="fn.latestObs(6266).getValueAsString($!{locale})"/>  
+       Linha: <lookup expression="fn.latestObs(6268).getValueAsString($!{locale})"/>  
+      </td>
+      </tr>
+    <tr>
+      <td width="245"><div align="right">Nome:</div></td>
+      <td width="348"><lookup expression="patient.personName"/></td>
+    </tr>
+    <tr>
+      <td><div align="right">Contacto:</div></td>
+      <td><lookup expression="patient.getAttribute(9)"/></td>
+    </tr>
+    <tr>
+      <td>NID: <lookup expression="patient.getPatientIdentifier(2)"/>
+                      <lookup expression="patient.getPatientIdentifier(14)"/>
+  
+  </td>
+      <td><div align="right">Endereço:</div></td>
+      <td><lookup complexExpression="#foreach( $addr in $patient.addresses ) $!addr.subregion #end"/></td>
+    </tr>
+    
+    </tbody>
+  </table>
+  
+  <br/>
+  
+  <table width="1000" border="1" align="center">
+    <tbody align="left" style="font-family:verdana; font-size:12px">
+    
+    
+    <tr>
+      <td><div align="right">Data de Levantamento:</div></td>
+      <td><encounterDate id="dataConsulta"/></td>
+    </tr>
+    <tr>
+      <td><div align="right">Provedor:</div></td>
+      <td><encounterProvider role="Provider" type="autocomplete"/></td>
+    </tr>
+    <tr>
+      <td><div align="right">Unidade Sanitária:</div></td>
+      <td>
+   <encounterLocation id="localConsulta" default="GlobalProperty:default_location" type="autocomplete"/>
+   </td>
+    </tr>
+    <tr>
+      <td width="40%"><div align="right">Regime ARVs:</div></td>
+      <td width="60%">Ultimo Regime:
+        <strong>
+        <lookup expression="fn.latestObs(1088).getValueAsString($!{locale})"/></strong><br />
+        
+     
+      <obs id="regime" conceptId="e1d83e4e-1d5f-11e0-b929-000c29ad1d07" answerConceptIds="
+                                              e1de19fe-1d5f-11e0-b929-000c29ad1d07,
+                                              28b28521-b6cd-454e-9ec5-f2c6c9c58468,
+                                              e1dd2f44-1d5f-11e0-b929-000c29ad1d07,
+                                              9dc17c1b-7b6d-488e-a38d-505a7b65ec82,
+                                              2e44e77e-eac4-4f64-84d2-73d32abf94d5,
+                                              78419317-cdda-42e9-92a3-13cb0cbf0020,
+                                              e3f6bb60-e2cf-46cb-a9da-27d634ba8607,
+                                              af15246d-30b8-4aff-8391-ca2b58e2c88b,
+                                              3e7f46c7-a971-4c0c-82aa-a65589fd518e,
+                                              cf05347e-063c-4896-91a4-097741cf6be6,
+                                              e11be52e-0da1-4d32-ab5c-e0feb9b6abd6,
+                                              f8c5d365-7636-4449-9acd-c83c4fd2ea01,
+                                              d5f9d629-67bc-4f60-9e12-629e6d2c1d08,
+                                              7bf5a88d-6db6-4899-a01a-bfd14ce77b53,
+                                              e8b741b3-463c-46b1-8423-a16f736af8d4,
+                                              ba25f2b5-4216-4605-9e6b-1f591033dc3e,
+                                              7d18d08c-d1a8-4dc8-8d65-02197b42acf7,
+                                              c22c4431-a27e-4054-92bb-a1563482003e,
+                                              c4a56680-ac6e-4538-8126-e3097b7b4789,
+                                              8f9c4e58-0d70-4b09-a109-e776d325e9fd,
+                                              9cb63f72-4c08-4543-878a-537dcabe5670,
+                                              46b8a2ab-36a7-4072-ab62-0af9b3b58e72,
+                                              552dd71f-d1de-426a-a19c-49b8706a4a7f,
+                                              f32e013c-38c8-483a-8012-88596e8b13da,
+                                              c30f826d-9433-4e63-ac91-dbbc158686ff,
+                                              e1e59e0e-1d5f-11e0-b929-000c29ad1d07" labelText="" answerLabels="AZT+3TC+EFV,
+                                                                                                              AZT+3TC+LPV/r,
+                                                                                                              AZT+3TC+NVP,
+                                                                                                              TDF+3TC+EFV,
+                                                                                                              TDF+3TC+NVP,
+                                                                                                              ABC+3TC+EFV,
+                                                                                                              TDF+3TC+DTG,
+                                                                                                              ABC+3TC+DTG,
+                                                                                                              AZT+3TC+ABC,
+                                                                                                              ABC+3TC+LPV/r,
+                                                                                                              ABC+3TC+NVP,
+                                                                                                              TDF+3TC+LPV/r,
+                                                                                                              TDF+3TC+LPV/r+RTV,
+                                                                                                              TDF+3TC+ATV/r,
+                                                                                                              ABC+3TC+ATV/r,
+                                                                                                              AZT+3TC+ATV/r,
+                                                                                                              ABC+3TC+ATV/r+RAL,
+                                                                                                              TDF+3TC+ATV/r+RAL,
+                                                                                                              AZT+3TC+RAL,
+                                                                                                              AZT+3TC+DRV/r,
+                                                                                                              AZT+3TC+DTG,
+                                                                                                              TDF+3TC+RAL+DRV/r,
+                                                                                                              ABC+3TC++RAL+DRV/r,
+                                                                                                              3TC+RAL+DRV/r,
+                                                                                                              AZT+3TC+RAL+DRV/r,
+                                                                                                              OUTRO" required="true">
+	
+																											  
+	</obs>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+     
+      
+      </td>
+    </tr>  
+
+<tr>
+      <td><div align="right">Medicamentos ARV:</div></td>
+      <td>
+
+<repeat>
+                            <template>
+                                <obsgroup groupingConceptId="5ad593a4-bea2-4eef-ac88-11654e79d9da">
+                                        
+<span name="regimen-formulations">                                
+<obs conceptId="165246"   labelText="Formulação:"  answerDrugIds=
+                                                                "5f415833-b26a-4996-8066-48847431404a, 
+                                                                6472bd7a-93f6-4e05-baa3-8c4684c8013e,
+                                                                6eb479db-3bef-4de8-af61-4610d4ead1ba"
+/>
+</span>
+<obs id="quantidadeAviada" conceptId="1715" labelText="Quantidade:" /> 
+<obs id="posologia" conceptId="1711" labelText="Dosagem:" answers="1-0-1,0-0-1,1-0-0,2-0-2,3-0-3,0-0-3,1-0-2,1-0-1.5" answerLabels="1-0-1,0-0-1,1-0-0,2-0-2,3-0-3,0-0-3,1-0-2,1-0-1.5"/>
+<br/>
+                                </obsgroup>
+                            </template>
+                            <render/>
+<render/>
+<render/>
+<render/>
+                        </repeat>
+
+
+</td>
+    </tr>
+
+
+    
+    <tr>
+      <td><div align="right">Data do próximo Levantamento:</div></td>
+      <td><obs id="dataProxima" conceptId="5096" labelText="" allowFutureDates="true" required="true"/></td>
+    </tr>
+     <tr>
+      <td><div align="right">Levantamento efectuado num campo de acomodação?</div></td>
+      <td><obs id="levaCamp" conceptId="23856" labelText="" answerConceptIds="1065,1066" answerLabels="Sim, Não"/></td>
+    </tr>
+    <tr>
+      <td><div align="right">Qual é o número do campo?</div></td>
+      <td><obs id="nomeCamp" conceptId="23857" labelText=""/></td>
+    </tr>
+  <tr>
+      <td><div align="right">Modo de Dispensa</div></td>
+      <td>     
+        <obs id="modoDeDispensa" conceptId="40a9a12b-1205-4a55-bb93-caf15452bf61" answerConceptIds="4b51ace2-f778-4f54-bdaa-be2b350b7499,
+        1309d08a-5c73-4429-8f4b-43a551952858,
+        d2eaec39-9c48-443b-a8d5-b2b163d42c53,
+        870e2d25-c5ef-4e36-89db-0a4a37af214e,
+        0843c71b-be47-4de2-ba16-a08db52c1136,
+        3ab58d0e-f831-4966-97bd-209738f5e4df,
+        d6ad74a1-ff67-4b81-afa1-a0d906462623,
+        467718bc-1756-4b3f-b1ee-98d01910153a,
+        091737af-d6bf-4830-8e87-82572ffac9ea
+        " labelText="" answerLabels="Horário Normal de Expediente,
+        Fora do Horário,
+        FARMAC/Farmácia privada,
+        Dispensa Comunitária via Provedor,
+        Dispensa Comunitária via APE,
+        Brigadas Móveis Diurnas,
+        Brigadas Móveis Nocturnas (Hotspots),
+        Clínicas Móveis Diurnas,
+        Clínicas Móveis Nocturnas (Hotspots)" /></td>
+    </tr>
+    <tr>
+      <td colspan="2"><div align="center">
+     <submit submitLabel="Submeter"/>
+    </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+  
+  </body>
+  </html>
+  </htmlform>
