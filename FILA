@@ -1,8 +1,33 @@
 <htmlform>
   <script type="text/javascript">
+  // Keys are regimen concept IDs
   var formulations = {
-    1703: [ "Drug:40", "Drug:22"],
-    6100: [ "Drug:28", "Drug:22"]
+    1703: [ "Drug:40", "Drug:22", "Drug:39" ],
+    6100: [ "Drug:28", "Drug:22", "Drug:23", "Drug:27", "Drug:29", "Drug:30" ],
+    23786: [ "Drug:18", "Drug:19", "Drug:20", "Drug:21" ],
+    23815: [ "Drug:22", "Drug:19" ],
+    6106: [ "Drug:20", "Drug:21", "Drug:30", "Drug:37", "Drug:18", "Drug:41", "Drug:17", "Drug:28", "Drug:27", "Drug:29", "Drug:26" ],
+    23784: [ "Drug:11", "Drug:12", "Drug:13" ],
+    23801: [ "Drug:25", "Drug:22" ],
+    23791: [ "Drug:24", "Drug:31" ],
+    23792: [ "Drug:18", "Drug:31" ],
+    23793: [ "Drug:31", "Drug:22" ],
+    1651: [ "Drug:32", "Drug:22", "Drug:47", "Drug:33", "Drug:23", "Drug:48" ],
+    6116: [ "Drug:37", "Drug:22", "Drug:49", "Drug:38", "Drug:23" ],
+    6324: [ "Drug:43", "Drug:41", "Drug:42", "Drug:44", "Drug:45", "Drug:46", "Drug:39" ],
+    6105: [ "Drug:37", "Drug:18", "Drug:41", "Drug:32", "Drug:21", "Drug:33" ],
+    23788: [ "Drug:37", "Drug:41", "Drug:42", "Drug:24", "Drug:28" ],
+    6424: [ "Drug:41", "Drug:42", "Drug:24", "Drug:17", "Drug:28" ],
+    6243: [ "Drug:41", "Drug:42", "Drug:24", "Drug:32" ],
+    6104: [ "Drug:37", "Drug:18", "Drug:41", "Drug:39", "Drug:21", "Drug:40" ],
+    6107: [ "Drug:42", "Drug:28", "Drug:22" ],
+    6234: [ "Drug:17" ],
+    165251: [ "Drug:24", "Drug:25" ],
+    165252: [ "Drug:18", "Drug:25" ],
+    165215: [ "Drug:50" ],
+    23789: [ "Drug:36", "Drug:42", "Drug:17", "Drug:28" ],
+    23787: [ "Drug:36", "Drug:37", "Drug:28" ],
+    6326: [ "Drug:37", "Drug:22", "Drug:17", "Drug:28" ],
   }
 
   function emptyValue(value) {
@@ -29,8 +54,24 @@
             }
           });
         });
+      } else {
+        // Clean up the option list
+        var optionsCached = false;
+        jQuery('span[name="regimen-formulations"] select').each(function() {
+          if(!optionsCached) {
+            jQuery(this).children().each(function() {
+              var uncachedOption = jQuery(this).val();
+              if(emptyValue(uncachedOption)) {
+                valueLessOption = this;
+              } else {
+                formulationsOptions[uncachedOption] = this;
+              }
+            });
+            optionsCached = true;
+          }
+          jQuery(this).children().remove();
+        });
       }
-    console.log('formulations: ', formulationsOptions);
     getField('regime.value').change(function(){
         var regimenValue = getValue('regime.value');
         jQuery('span[name="regimen-formulations"] select').each(function() {
@@ -39,11 +80,17 @@
             var jQuerizedOption = jQuery(valueLessOption);
             jQuery(_thisSelect).append(jQuerizedOption[0].outerHTML);
 
-            formulations[regimenValue].forEach(function(optionValue) {
-              jQuerizedOption = jQuery(formulationsOptions[optionValue]);
-              jQuery(_thisSelect).append(jQuerizedOption[0].outerHTML);
-            });
-        });
+            if(!emptyValue(formulations[regimenValue])) {
+              formulations[regimenValue].forEach(function(optionValue) {
+                var optionToAppend = jQuery(formulationsOptions[optionValue]);
+                console.log('optionValue: ' + optionValue);
+                console.log('jQuerized optionvalue', optionToAppend);
+                jQuery(_thisSelect).append(optionToAppend[0].outerHTML);
+              });
+            } else {
+              console.log('Regimen value', formulations[regimenValue]);
+            }
+        });    
     });
   });
 
@@ -261,6 +308,15 @@ if (isNaN(selectedDispenseMode)){
                                               552dd71f-d1de-426a-a19c-49b8706a4a7f,
                                               f32e013c-38c8-483a-8012-88596e8b13da,
                                               c30f826d-9433-4e63-ac91-dbbc158686ff,
+                                              0aa759a0-280a-48d4-b9aa-8e45d56b281f,
+                                              7dbbd087-c9df-4465-9188-cc10b3c23e35,
+                                              17247380-ec48-46b3-8159-5ee50c84129a,
+                                              de8cc260-0988-4321-8b09-ae6d8d740502,
+                                              6097bea4-dbf6-4fca-aee8-00a71e49e4ec,
+                                              106e650c-0fe3-4193-acb4-74afe900382a,
+                                              5044237e-ceba-4dc8-8368-bc54c5c82b84,
+                                              71fd3c9a-8e9c-4f1f-ad85-4f979e59dbd1,
+                                              4d7a8dce-2115-4d18-a0ba-4add8aa2c7a1,
                                               e1e59e0e-1d5f-11e0-b929-000c29ad1d07" labelText="" answerLabels="AZT+3TC+EFV,
                                                                                                               AZT+3TC+LPV/r,
                                                                                                               AZT+3TC+NVP,
@@ -283,67 +339,82 @@ if (isNaN(selectedDispenseMode)){
                                                                                                               AZT+3TC+DRV/r,
                                                                                                               AZT+3TC+DTG,
                                                                                                               TDF+3TC+RAL+DRV/r,
-                                                                                                              ABC+3TC++RAL+DRV/r,
+                                                                                                              ABC+3TC+RAL+DRV/r,
                                                                                                               3TC+RAL+DRV/r,
                                                                                                               AZT+3TC+RAL+DRV/r,
+                                                                                                              TDF+3TC+RAL,
+                                                                                                              ABC+3TC+RAL,
+                                                                                                              TDF+FTC PreEP,
+                                                                                                              TDF+AZT+LPV/r,
+                                                                                                              ABC+AZT+LPV/r,
+                                                                                                              ABC+AZT+3TC+LPV/r,
+                                                                                                              TDF+ABC+LPV/r,
+                                                                                                              TDF+ABC+3TC+LPV/r,
+                                                                                                              TDF+AZT+3TC+LPV/r,
                                                                                                               OUTRO" required="true">
 	
 																											  
 	</obs>
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-     
-      
       </td>
     </tr>  
 
 <tr>
       <td><div align="right">Medicamentos ARV:</div></td>
       <td>
-
 <repeat>
-                            <template>
-                                <obsgroup groupingConceptId="5ad593a4-bea2-4eef-ac88-11654e79d9da">
+<template>
+  <obsgroup groupingConceptId="5ad593a4-bea2-4eef-ac88-11654e79d9da">
                                         
-<span name="regimen-formulations">                                
-<obs conceptId="165246"   labelText="Formulação:"  answerDrugIds=
-                                                                "5f415833-b26a-4996-8066-48847431404a, 
-                                                                6472bd7a-93f6-4e05-baa3-8c4684c8013e,
-                                                                6eb479db-3bef-4de8-af61-4610d4ead1ba"
-/>
-</span>
-<obs id="quantidadeAviada" conceptId="1715" labelText="Quantidade:" /> 
-<obs id="posologia" conceptId="1711" labelText="Dosagem:" answers="1-0-1,0-0-1,1-0-0,2-0-2,3-0-3,0-0-3,1-0-2,1-0-1.5" answerLabels="1-0-1,0-0-1,1-0-0,2-0-2,3-0-3,0-0-3,1-0-2,1-0-1.5"/>
-<br/>
-                                </obsgroup>
-                            </template>
-                            <render/>
+    <span name="regimen-formulations">                                
+      <obs conceptId="165246"   labelText="Formulação:"  answerDrugIds=
+                                                                  "08S01ZY-d7-4218-4032-aa8c-615aec71a218,
+                                                                  08S30ZY-ae-3c79-46bd-9970-2d02b8788fdf,
+                                                                  08S01ZW-ec-ec31-45aa-a74e-7238872483e8,
+                                                                  08S01ZZ-2e-29dd-40aa-94b4-0d4fe65e081c,
+                                                                  08S40-833-b26a-4996-8066-48847431404a,
+                                                                  08S18W-7f-c2a7-4d27-95dc-564791951b5f,
+                                                                  08S18WI-4-70b1-4732-af8b-be24cb04aaa6,
+                                                                  08S18WII-5863-4423-9e97-bc1b480df134,
+                                                                  08S18Z-da-b787-4fa1-a2d6-2fda22da6564,
+                                                                  08S30ZZ-b2-edb5-4815-a4bf-8f0618f029be,
+                                                                  08S30WZ-48-cf6b-47e2-a101-0cc9faa8fbce,
+                                                                  08S22-d18-2655-4426-868a-b291a5adff38,
+                                                                  08S42-d98-6b3e-485f-b969-376fca8b7789,
+                                                                  08S23Z-cd-22ff-4993-9378-335cf43bd5c8,
+                                                                  08S40Z-fc-6563-49e4-bf81-a456bf79ec88,
+                                                                  08S42B-d89-7e03-4f25-975e-b66a5e28e063,
+                                                                  08S21-918-6273-4f5c-be72-755da371e731,
+                                                                  08S20-9db-3bef-4de8-af61-4610d4ead1ba,
+                                                                  08S01-ab-d6e9-4de6-beb8-441daf8d00a3,
+                                                                  08S41-ec0-c1cf-42e1-9a37-9f23b4f07bba,
+                                                                  08S01Z-02-843e-4dd0-af6f-2eff173d4b30,
+                                                                  08S39Z-7a-93f6-4e05-baa3-8c4684c8013e,
+                                                                  08S39B-b2-e392-425a-b824-f33f745733e6,
+                                                                  08S38Y-0c-0932-4b37-ab53-4aae60820544,
+                                                                  08S39Y-3a-20c8-4a16-aaea-f2d4537202e4,
+                                                                  08S18XI-6-0715-4389-a4b2-d20de330e26c,
+                                                                  08S13-ddb-e5bd-4b96-ae5d-11ada78c8a35,
+                                                                  08S18-6cb-4b62-4cc0-98af-8053e1396419,
+                                                                  08S18X-b0-de4a-4233-86fa-c91f9e606be5,
+                                                                  08S18XII-3a07-4e5f-9d00-0016dc840a84,
+                                                                  08S18Y-5e-9493-41e4-a5e0-5671be3fd66b,
+                                                                  08S38Z-99-3fe6-48b7-9b25-3052660f3d8b,
+                                                                  08S39-054-ad23-4d26-8ca1-88308070d08e,
+                                                                  08S31-9e9-49f9-4cd6-8268-8df7315e3d09,
+                                                                  08S15-f3b-d54c-420d-ad96-698f71c003c5" />
+    </span>
+    <obs id="quantidadeAviada" conceptId="1715" labelText="Quantidade:" /> 
+    <obs id="posologia" conceptId="1711" labelText="Dosagem:" answers="1-0-1,0-0-1,1-0-0,2-0-2,3-0-3,0-0-3,1-0-2,1-0-1.5" answerLabels="1-0-1,0-0-1,1-0-0,2-0-2,3-0-3,0-0-3,1-0-2,1-0-1.5"/>
+    <br/>
+  </obsgroup>
+</template>
 <render/>
 <render/>
 <render/>
-                        </repeat>
-
-
+<render/>
+</repeat>
 </td>
     </tr>
-
-
-    
     <tr>
       <td><div align="right">Data do próximo Levantamento:</div></td>
       <td><obs id="dataProxima" conceptId="5096" labelText="" allowFutureDates="true" required="true"/></td>
