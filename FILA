@@ -22,8 +22,8 @@
     6104: [ "Drug:37", "Drug:18", "Drug:41", "Drug:39", "Drug:21", "Drug:40" ],
     6107: [ "Drug:42", "Drug:28", "Drug:22" ],
     6234: [ "Drug:17" ],
-    165251: [ "Drug:24", "Drug:25" ],
-    165252: [ "Drug:18", "Drug:25" ],
+    165261: [ "Drug:24", "Drug:25" ],
+    165262: [ "Drug:18", "Drug:25" ],
     165215: [ "Drug:50" ],
     23789: [ "Drug:36", "Drug:42", "Drug:17", "Drug:28" ],
     23787: [ "Drug:36", "Drug:37", "Drug:28" ],
@@ -366,7 +366,7 @@ if (isNaN(selectedDispenseMode)){
   <obsgroup groupingConceptId="5ad593a4-bea2-4eef-ac88-11654e79d9da">
                                         
     <span name="regimen-formulations">                                
-      <obs conceptId="165246"   labelText="Formulação:"  answerDrugIds=
+      <obs conceptId="165256"   labelText="Formulação:"  answerDrugIds=
                                                                   "08S01ZY-d7-4218-4032-aa8c-615aec71a218,
                                                                   08S30ZY-ae-3c79-46bd-9970-2d02b8788fdf,
                                                                   08S01ZW-ec-ec31-45aa-a74e-7238872483e8,
