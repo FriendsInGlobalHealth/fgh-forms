@@ -1,4 +1,41 @@
 <htmlform>
+  <ifMode mode="VIEW" include="false">
+      <script type="text/javascript">
+        // Number of repeatedly rendered posology obs
+        var REPEATED_OBS = 4;
+
+        // Workaround to enforce closure of the for loop index on the listener.
+        function createDosageValueChangeListener(posologyObsId, otherPosologyId) {
+          return function() {
+            var posologiaValue = getValue(posologyObsId + '.value');
+              console.log('posologyId (when listener is called): ' + posologyObsId);
+              console.log('thamani ya posologia: ', posologiaValue);
+              if(posologiaValue == 'outraPosologia') {
+                //getField(otherPosologyId + '.value').show();
+                jQuery('#' + otherPosologyId).css('display', 'inline');
+              } else {
+                jQuery('#' + otherPosologyId).css('display', 'none');
+              }
+          };
+        }
+
+        jQuery(function() {
+          for(var index=1; index &lt;= REPEATED_OBS; index++) {
+            var posologyObsId = 'posologia' + index;
+            var otherPosologyId = 'otherPosology' + index;
+            var initialPosologiaValue = getValue(posologyObsId + '.value');
+            if(!emptyValue(initialPosologiaValue) &#38;&#38; initialPosologiaValue === 'outraPosologia') {
+              jQuery('#' + otherPosologyId).css('display', 'inline');
+            } else {
+              jQuery('#' + otherPosologyId).css('display', 'none');
+            }
+            console.log('posologyId: ' + posologyObsId);
+            getField(posologyObsId + '.value').change(createDosageValueChangeListener(posologyObsId, otherPosologyId));
+          }
+        });
+      </script>
+  </ifMode>
+
   <script type="text/javascript">
   // Keys are regimen concept IDs
   var formulations = {
@@ -39,39 +76,39 @@
 
   jQuery(function() {
     // Initially (For example when editing the form)
-      var initialRegimen = getValue('regime.value');
-      if(!emptyValue(initialRegimen)) {
-        jQuery('span[name="regimen-formulations"] select').each(function() {
+    var initialRegimen = getValue('regime.value');
+    if(!emptyValue(initialRegimen)) {
+      jQuery('span[name="regimen-formulations"] select').each(function() {
+        jQuery(this).children().each(function() {
+          var optionValue = jQuery(this).val();
+          if(!emptyValue(optionValue) &#38;&#38; !formulations[initialRegimen].includes(optionValue)) {
+            jQuery(this).remove()
+          } 
+          if(emptyValue(optionValue)) {
+            valueLessOption = this;
+          } else {
+            formulationsOptions[optionValue] = this;
+          }
+        });
+      });
+    } else {
+      // Clean up the option list
+      var optionsCached = false;
+      jQuery('span[name="regimen-formulations"] select').each(function() {
+        if(!optionsCached) {
           jQuery(this).children().each(function() {
-            var optionValue = jQuery(this).val();
-            if(!emptyValue(optionValue) &#38;&#38; !formulations[initialRegimen].includes(optionValue)) {
-              jQuery(this).remove()
-            } 
-            if(emptyValue(optionValue)) {
+            var uncachedOption = jQuery(this).val();
+            if(emptyValue(uncachedOption)) {
               valueLessOption = this;
             } else {
-              formulationsOptions[optionValue] = this;
+              formulationsOptions[uncachedOption] = this;
             }
           });
-        });
-      } else {
-        // Clean up the option list
-        var optionsCached = false;
-        jQuery('span[name="regimen-formulations"] select').each(function() {
-          if(!optionsCached) {
-            jQuery(this).children().each(function() {
-              var uncachedOption = jQuery(this).val();
-              if(emptyValue(uncachedOption)) {
-                valueLessOption = this;
-              } else {
-                formulationsOptions[uncachedOption] = this;
-              }
-            });
-            optionsCached = true;
-          }
-          jQuery(this).children().remove();
-        });
-      }
+          optionsCached = true;
+        }
+        jQuery(this).children().remove();
+      });
+    }
     getField('regime.value').change(function(){
         var regimenValue = getValue('regime.value');
         jQuery('span[name="regimen-formulations"] select').each(function() {
@@ -403,15 +440,16 @@ if (isNaN(selectedDispenseMode)){
                                                                   08S31-9e9-49f9-4cd6-8268-8df7315e3d09,
                                                                   08S15-f3b-d54c-420d-ad96-698f71c003c5" />
     </span>
-    <obs id="quantidadeAviada" conceptId="1715" labelText="Quantidade:" /> 
-    <obs id="posologia" conceptId="1711" labelText="Dosagem:" answers="1-0-1,0-0-1,1-0-0,2-0-2,3-0-3,0-0-3,1-0-2,1-0-1.5" answerLabels="1-0-1,0-0-1,1-0-0,2-0-2,3-0-3,0-0-3,1-0-2,1-0-1.5"/>
+    <obs id="quantidadeAviada" conceptId="1715" labelText="Quantidade:" />  
+    <obs id="{posologiaObsId}" conceptId="1711" labelText="Dosagem:" answers="1-0-1,0-0-1,1-0-0,2-0-2,3-0-3,0-0-3,1-0-2,1-0-1.5,outraPosologia" answerLabels="1-0-1,0-0-1,1-0-0,2-0-2,3-0-3,0-0-3,1-0-2,1-0-1.5, Outra"/>
+    <obs id="{otherPosologyObsId}" conceptId="165263" labelText="Outra Dosagem:"/>
     <br/>
   </obsgroup>
 </template>
-<render/>
-<render/>
-<render/>
-<render/>
+<render posologiaObsId="posologia1" otherPosologyObsId="otherPosology1"/>
+<render posologiaObsId="posologia2" otherPosologyObsId="otherPosology2"/>
+<render posologiaObsId="posologia3" otherPosologyObsId="otherPosology3"/>
+<render posologiaObsId="posologia4" otherPosologyObsId="otherPosology4"/>
 </repeat>
 </td>
     </tr>
